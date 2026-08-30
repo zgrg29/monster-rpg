@@ -10,7 +10,7 @@ from src.game_state import init_game_state, reset_game
 from src.combat_engine import process_player_action, process_enemy_turn
 from src.components import render_enemy_display, render_party_grid, render_combat_logs
 
-# 1. 页面基本配置（针对手机端网页优化宽度和标题）
+# 1. 页面基本配置
 st.set_page_config(
     page_title="机甲少女战记 - 策略 RPG",
     page_icon="⚔️",
@@ -45,16 +45,13 @@ if player["hp"] <= 0:
         st.rerun()
     st.stop()
 
-# ==================== 核心布局展示 ====================
+# ==================== 手机端黄金视口布局 ====================
 
-# 阶段一：屏幕正中间 —— 敌人立绘与机制状态区
+# 1. 屏幕正中间 —— 敌人立绘与机制状态区
 render_enemy_display(enemy)
 
-# 阶段二：屏幕下方 —— 4格小队网格
+# 2. 屏幕下方 —— 4格小队网格（查看自身生命值）
 render_party_grid(party)
-
-# 阶段三：战斗战报折叠区
-render_combat_logs(logs)
 
 st.markdown("---")
 st.markdown("#### 🎮 战术指令行动区")
@@ -64,23 +61,21 @@ weapon_prof = player["proficiencies"]["weapon"]
 skill_prof = player["proficiencies"]["skill"]
 magic_prof = player["proficiencies"]["magic"]
 
-# 5. 底部触控操作区（手机端大按钮设计）
+# 3. 紧随小队下方的触控操作区（拇指黄金触达区，无需滑动）
 col_a, col_b, col_c = st.columns(3)
 
 with col_a:
-    btn_text_w = f"⚔️ 武器攻击\n({int(weapon_prof['level']*100)}%)"
+    btn_text_w = f"⚔️ 武器\n({int(weapon_prof['level']*100)}%)"
     if st.button(btn_text_w, use_container_width=True):
-        # 1. 玩家行动
         action_logs = process_player_action(player, enemy, "weapon")
         logs.extend(action_logs)
-        # 2. 敌人反击（如果敌人还活着）
         if enemy["hp"] > 0:
             enemy_logs = process_enemy_turn(player, enemy)
             logs.extend(enemy_logs)
         st.rerun()
 
 with col_b:
-    btn_text_s = f"🛡️ 战术架势\n({int(skill_prof['level']*100)}%)"
+    btn_text_s = f"🛡️ 架势\n({int(skill_prof['level']*100)}%)"
     if st.button(btn_text_s, use_container_width=True):
         action_logs = process_player_action(player, enemy, "skill")
         logs.extend(action_logs)
@@ -90,7 +85,7 @@ with col_b:
         st.rerun()
 
 with col_c:
-    btn_text_m = f"✨ 微光治愈\n({int(magic_prof['level']*100)}%)"
+    btn_text_m = f"✨ 治愈\n({int(magic_prof['level']*100)}%)"
     if st.button(btn_text_m, use_container_width=True):
         action_logs = process_player_action(player, enemy, "magic")
         logs.extend(action_logs)
@@ -98,6 +93,9 @@ with col_c:
             enemy_logs = process_enemy_turn(player, enemy)
             logs.extend(enemy_logs)
         st.rerun()
+
+# 4. 战报日志沉底（折叠展示，避免撑开屏幕导致滑动）
+render_combat_logs(logs)
 
 # 侧边栏：查看详细熟练度与角色面板
 with st.sidebar:
