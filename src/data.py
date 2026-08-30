@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 src/data.py
-游戏静态数据配置：包含主角初始属性、熟练度结构、敌人（机制怪）数据及装备词缀。
+游戏静态数据配置：包含主角初始属性、熟练度结构、敌人数据及装备词缀。
 """
 
 # 主角初始配置
@@ -11,28 +11,35 @@ INITIAL_PLAYER = {
     "max_hp": 150,
     "mp": 100,
     "max_mp": 100,
-    # 熟练度系统：uses (使用次数), level (熟练度百分比 0~100+)
+    # 4 种基础指令的熟练度体系
     "proficiencies": {
-        "weapon": {
-            "name": "重剑斩击", 
-            "type": "weapon",
+        "physical": {
+            "name": "物理斩击", 
+            "type": "physical",
             "uses": 0, 
-            "level": 0.0, # 0.0 代表 0%，1.0 代表 100%
-            "base_power": 40
-        },
-        "skill": {
-            "name": "战术架势", 
-            "type": "skill",
-            "uses": 0, 
-            "level": 0.0,
-            "base_power": 25
+            "level": 0.0, 
+            "base_power": 45
         },
         "magic": {
-            "name": "微光治愈", 
+            "name": "元素法球", 
             "type": "magic",
             "uses": 0, 
             "level": 0.0,
-            "base_power": 30
+            "base_power": 40
+        },
+        "defense": {
+            "name": "战术防御", 
+            "type": "defense",
+            "uses": 0, 
+            "level": 0.0,
+            "base_power": 20  # 代表减伤/护盾值
+        },
+        "heal": {
+            "name": "急救回复", 
+            "type": "heal",
+            "uses": 0, 
+            "level": 0.0,
+            "base_power": 35  # 代表回复血量值
         },
     },
     "equipment": {
@@ -47,28 +54,21 @@ FIRST_BOSS = {
     "name": "机甲少女·阿尔法",
     "hp": 300,
     "max_hp": 300,
-    "shield": 3,          # 特殊机制：3层物理免伤盾（必须通过魔法或破盾技能消耗）
-    "charge": 0,          # 大招蓄能进度（满 4 回合释放全屏毁灭打击）
+    "shield": 3,          # 物理免伤护盾（需通过魔法破除）
+    "charge": 0,          # 蓄能
     "max_charge": 4,
-    "status_desc": "【绝对防御】免疫前3次物理攻击",
-    "avatar": "🤖",       # 手机端临时用 Emoji 代替立绘，后续可换图片路径
+    "status_desc": "【绝对防御】免疫物理攻击，需用魔法或持续消耗",
+    "avatar": "🤖",
     "drop_reward": "阿尔法的核心零件"
 }
 
-# 基础装备/词缀库
+# 装备池
 EQUIPMENT_POOL = [
     {
         "id": "eq_01",
         "name": "吸血鬼指环",
         "slot": "accessory",
-        "description": "每次造成伤害时，将 20% 转化为自身生命，但无法接受外部治疗。",
+        "description": "每次造成伤害时，将 20% 转化为自身生命。",
         "trait": "vampire"
-    },
-    {
-        "id": "eq_02",
-        "name": "重装力场组件",
-        "slot": "armor",
-        "description": "免疫暴击伤害，但行动速度/熟练度获取效率降低 20%。",
-        "trait": "heavy_shield"
     }
 ]
