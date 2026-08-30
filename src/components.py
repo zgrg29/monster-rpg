@@ -33,15 +33,11 @@ def render_party_row(party, current_index):
             # 判断是否是当前行动的角色
             is_active = (i == current_index) and (member is not None)
             
-            # 使用 container 并通过 markdown 简单定制高亮视觉
-            border_color = "orange" if is_active else "#333333"
-            bg_style = "background-color: rgba(255, 165, 0, 0.1);" if is_active else ""
-            
             with st.container(border=True):
                 if is_active:
-                    st.markdown(f"<p style='color: orange; font-weight: bold; font-size: 12px; margin:0;'>▶ 【行动中】</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='color: orange; font-weight: bold; font-size: 11px; margin:0;'>▶ 【行动中】</p>", unsafe_allow_html=True)
                 else:
-                    st.markdown(f"<p style='color: gray; font-size: 12px; margin:0;'>{role_labels[i]}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='color: gray; font-size: 11px; margin:0;'>{role_labels[i]}</p>", unsafe_allow_html=True)
                 
                 if member is not None:
                     st.markdown(f"**{member['name']}**")
@@ -49,7 +45,7 @@ def render_party_row(party, current_index):
                     hp_p = max(0.0, min(1.0, member["hp"] / member["max_hp"]))
                     st.progress(hp_p)
                 else:
-                    st.markdown("<p style='color: gray; text-align: center; font-size: 12px;'>[ 空位 ]</p>", unsafe_allow_html=True)
+                    st.markdown("<p style='color: gray; text-align: center; font-size: 11px;'>[ 空位 ]</p>", unsafe_allow_html=True)
 
 def render_combat_logs(logs):
     """渲染战报日志"""
