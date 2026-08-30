@@ -44,75 +44,89 @@ if player["hp"] <= 0:
         st.rerun()
     st.stop()
 
-# ==================== 手机端黄金视口布局 ====================
+# ==================== 📌 统一战斗画面容器 ====================
 
-# 1. 屏幕正中间 —— 敌人立绘与机制状态
-render_enemy_display(enemy)
+battle_screen = st.container()
 
-# 2. 横向一排 4 人小队
-render_party_row(party, st.session_state.current_actor_index)
+with battle_screen:
 
-st.markdown("---")
+    # 1. 敌人区域（永远在最上方）
+    enemy_area = st.container()
+    with enemy_area:
+        render_enemy_display(enemy)
 
-current_idx = st.session_state.current_actor_index
-active_actor = party[current_idx]
+    st.markdown("---")
 
-st.markdown(f"#### 🎮 战术指令行动区 (当前行动：<span style='color:orange;'>{active_actor['name'] if active_actor else '无'}</span>)", unsafe_allow_html=True)
+    # 2. 己方队伍区域（永远在中间）
+    team_area = st.container()
+    with team_area:
+        render_party_row(party, st.session_state.current_actor_index)
 
-# 获取 4 种熟练度信息
-phys_prof = player["proficiencies"]["physical"]
-magic_prof = player["proficiencies"]["magic"]
-def_prof = player["proficiencies"]["defense"]
-heal_prof = player["proficiencies"]["heal"]
+    st.markdown("---")
 
-# 3. 4 个方向的操作按钮（采用 2x2 网格，完美适合手机单手点击，不挤压文字）
-row1_cols = st.columns(2)
-row2_cols = st.columns(2)
+    # 3. 指令行动区（永远在底部）
+    current_idx = st.session_state.current_actor_index
+    active_actor = party[current_idx]
 
-def advance_turn():
-    """推进到下一个角色或触发敌人回合"""
-    next_idx = st.session_state.current_actor_index + 1
-    found_next = False
-    
-    while next_idx < 4:
-        if party[next_idx] is not None:
-            st.session_state.current_actor_index = next_idx
-            found_next = True
-            break
-        next_idx += 1
+    st.markdown(
+        f"#### 🎮 战术指令行动区 (当前行动：<span style='color:orange;'>{active_actor['name'] if active_actor else '无'}</span>)",
+        unsafe_allow_html=True
+    )
+
+    # 获取熟练度
+    phys_prof = player["proficiencies"]["physical"]
+    magic_prof = player["proficiencies"]["magic"]
+    def_prof = player["proficiencies"]["defense"]
+    heal_prof = player["proficiencies"]["heal"]
+
+    # 按钮布局：2x2 网格
+    row1_cols = st.columns(2)
+    row2_cols = st.columns(2)
+
+    def advance_turn():
+        """推进到下一个角色或触发敌人回合"""
+        next_idx = st.session_state.current_actor_index + 1
+        found_next = False
         
-    if not found_next:
-        st.session_state.current_actor_index = 0  # 回到主角
-        if enemy["hp"] > 0:
-            enemy_logs = process_enemy_turn(party, enemy)
-            logs.extend(enemy_logs)
+        while next_idx < 4:
+            if party[next_idx] is not None:
+                st.session_state.current_actor_index = next_idx
+                found_next = True
+                break
+            next_idx += 1
+            
+        if not found_next:
+            st.session_state.current_actor_index = 0  # 回到主角
+            if enemy["hp"] > 0:
+                enemy_logs = process_enemy_turn(party, enemy)
+                logs.extend(enemy_logs)
 
-with row1_cols[0]:
-    if st.button(f"⚔️ 物理攻击\n({int(phys_prof['level']*100)}%)", use_container_width=True):
-        logs.extend(process_player_action(active_actor, enemy, "physical"))
-        advance_turn()
-        st.rerun()
+    with row1_cols[0]:
+        if st.button(f"⚔️ 物理攻击\n({int(phys_prof['level']*100)}%)", use_container_width=True):
+            logs.extend(process_player_action(active_actor, enemy, "physical"))
+            advance_turn()
+            st.rerun()
 
-with row1_cols[1]:
-    if st.button(f"🔮 魔法攻击\n({int(magic_prof['level']*100)}%)", use_container_width=True):
-        logs.extend(process_player_action(active_actor, enemy, "magic"))
-        advance_turn()
-        st.rerun()
+    with row1_cols[1]:
+        if st.button(f"🔮 魔法攻击\n({int(magic_prof['level']*100)}%)", use_container_width=True):
+            logs.extend(process_player_action(active_actor, enemy, "magic"))
+            advance_turn()
+            st.rerun()
 
-with row2_cols[0]:
-    if st.button(f"🛡️ 防御\n({int(def_prof['level']*100)}%)", use_container_width=True):
-        logs.extend(process_player_action(active_actor, enemy, "defense"))
-        advance_turn()
-        st.rerun()
+    with row2_cols[0]:
+        if st.button(f"🛡️ 防御\n({int(def_prof['level']*100)}%)", use_container_width=True):
+            logs.extend(process_player_action(active_actor, enemy, "defense"))
+            advance_turn()
+            st.rerun()
 
-with row2_cols[1]:
-    if st.button(f"✨ 回复\n({int(heal_prof['level']*100)}%)", use_container_width=True):
-        logs.extend(process_player_action(active_actor, enemy, "heal"))
-        advance_turn()
-        st.rerun()
+    with row2_cols[1]:
+        if st.button(f"✨ 回复\n({int(heal_prof['level']*100)}%)", use_container_width=True):
+            logs.extend(process_player_action(active_actor, enemy, "heal"))
+            advance_turn()
+            st.rerun()
 
-# 4. 战报日志沉底
-render_combat_logs(logs)
+    # 战报日志沉底
+    render_combat_logs(logs)
 
 # 侧边栏：查看属性与熟练度
 with st.sidebar:
